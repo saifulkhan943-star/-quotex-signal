@@ -1,0 +1,220 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quotex Signal Dashboard</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#10151f;color:white;
+ font-family:Arial,sans-serif;padding:15px
+}
+.container{max-width:650px;margin:auto}
+header{text-align:center;padding:15px}
+h1{color:#00d5ff;font-size:25px}
+.panel{
+ background:#1b2432;padding:17px;
+ border-radius:14px;margin:13px 0;
+ border:1px solid #303d50
+}
+label{display:block;margin:12px 0 6px;color:#b9c7d8}
+input,select{
+ width:100%;padding:12px;border:1px solid #43516a;
+ border-radius:8px;background:#101927;color:white;
+ font-size:15px
+}
+button{
+ width:100%;padding:14px;border:0;border-radius:9px;
+ background:#00b9e8;color:#00131c;font-size:17px;
+ font-weight:bold;margin-top:15px
+}
+.signal{text-align:center;padding:25px}
+.signal h2{font-size:35px;margin:10px}
+.call{color:#00e69a}
+.put{color:#ff5369}
+.wait{color:#ffcc66}
+.small{color:#a8b6c8;font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.status{font-size:14px;line-height:1.8}
+footer{text-align:center;color:#8996a8;font-size:12px;padding:20px}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+<h1>⚡ QUOTEX SIGNAL</h1>
+<p>SMART SIGNAL DASHBOARD</p>
+<div class="small">SMA 13 + Support Resistance + Candle Confirmation</div>
+</header>
+
+<div class="panel">
+<h3>Market Settings</h3>
+<label>Market Type</label>
+<select id="market">
+<option>Regular</option>
+<option>OTC</option>
+</select>
+
+<label>Asset / Currency Pair</label>
+<input id="asset" value="EUR/USD" placeholder="EUR/USD">
+
+<label>Expiry Time</label>
+<select id="expiry">
+<option value="60">60 Seconds</option>
+</select>
+</div>
+
+<div class="panel">
+<h3>13 Candle Closing Prices</h3>
+<label>Enter 13 closing prices, separated by commas</label>
+<textarea id="closes" rows="3" style="width:100%;padding:12px;background:#101927;color:white;border:1px solid #43516a;border-radius:8px" placeholder="1.0850,1.0852,1.0851,..."></textarea>
+<p class="small">পুরোনো থেকে নতুন ক্রমানুসারে ১৩টি Close Price দাও।</p>
+</div>
+
+<div class="panel">
+<h3>Support & Resistance</h3>
+<div class="grid">
+<div>
+<label>Support</label>
+<input id="support" type="number" step="any" placeholder="Support price">
+</div>
+<div>
+<label>Resistance</label>
+<input id="resistance" type="number" step="any" placeholder="Resistance price">
+</div>
+</div>
+</div>
+
+<div class="panel">
+<h3>Previous Candle OHLC</h3>
+<div class="grid">
+<div><label>Open</label><input id="po" type="number" step="any"></div>
+<div><label>High</label><input id="ph" type="number" step="any"></div>
+<div><label>Low</label><input id="pl" type="number" step="any"></div>
+<div><label>Close</label><input id="pc" type="number" step="any"></div>
+</div>
+</div>
+
+<div class="panel">
+<h3>Current Completed Candle OHLC</h3>
+<div class="grid">
+<div><label>Open</label><input id="co" type="number" step="any"></div>
+<div><label>High</label><input id="ch" type="number" step="any"></div>
+<div><label>Low</label><input id="cl" type="number" step="any"></div>
+<div><label>Close</label><input id="cc" type="number" step="any"></div>
+</div>
+<button onclick="generateSignal()">GENERATE SIGNAL</button>
+</div>
+
+<div class="panel signal">
+<div class="small">SIGNAL RESULT</div>
+<h2 id="result" class="wait">WAIT</h2>
+<div id="details">Enter candle data to analyze</div>
+</div>
+
+<div class="panel">
+<h3>Analysis Details</h3>
+<div class="status" id="analysis">
+SMA 13: Waiting<br>
+Trend: Waiting<br>
+Support: Waiting<br>
+Candle: Waiting<br>
+Confirmation: Waiting
+</div>
+</div>
+
+<div class="panel">
+<h3>Signal History</h3>
+<div id="history" class="small">No signals yet</div>
+</div>
+
+<footer>
+Signal analysis tool • Educational use only<br>
+No guaranteed profit or accuracy
+</footer>
+</div>
+
+<script>
+function num(id){
+ return Number(document.getElementById(id).value);
+}
+function generateSignal(){
+ const result=document.getElementById("result");
+ const details=document.getElementById("details");
+ const analysis=document.getElementById("analysis");
+
+ const closes=document.getElementById("closes").value
+ .split(",").map(x=>Number(x.trim()));
+
+ if(closes.length!==13 || closes.some(x=>!Number.isFinite(x)||x<=0)){
+ alert("Enter exactly 13 valid closing prices.");
+ return;
+ }
+
+ const s=num("support"),r=num("resistance");
+ const po=num("po"),ph=num("ph"),pl=num("pl"),pc=num("pc");
+ const co=num("co"),ch=num("ch"),cl=num("cl"),cc=num("cc");
+
+ const vals=[s,r,po,ph,pl,pc,co,ch,cl,cc];
+ if(vals.some(x=>!Number.isFinite(x)||x<=0) ||
+ s>=r || ph<Math.max(po,pc) || pl>Math.min(po,pc) ||
+ ch<Math.max(co,cc) || cl>Math.min(co,cc) ||
+ ph<pl || ch<cl){
+ alert("Check all OHLC, Support and Resistance values.");
+ return;
+ }
+
+ const sma=closes.reduce((a,b)=>a+b,0)/13;
+ const trendUp=cc>sma;
+ const trendDown=cc<sma;
+
+ const nearSupport=Math.abs(cc-s)/cc<=0.0015;
+ const nearResistance=Math.abs(cc-r)/cc<=0.0015;
+
+ const bullishEngulf=pc<po && cc>co &&
+ co<=pc && cc>=po;
+ const bearishEngulf=pc>po && cc<co &&
+ co>=pc && cc<=po;
+
+ let signal="WAIT",reason="Conditions not confirmed.";
+
+ if(trendUp && nearSupport && bullishEngulf){
+ signal="CALL";
+ reason="Uptrend + Support + Bullish Engulfing";
+ }
+ else if(trendDown && nearResistance && bearishEngulf){
+ signal="PUT";
+ reason="Downtrend + Resistance + Bearish Engulfing";
+ }
+
+ result.textContent=signal;
+ result.className=signal==="CALL"?"call":
+ signal==="PUT"?"put":"wait";
+
+ const market=document.getElementById("market").value;
+ const asset=document.getElementById("asset").value;
+ details.innerHTML=
+ market+" | "+asset+" | 60 Seconds<br>"+reason;
+
+ analysis.innerHTML=
+ "SMA 13: "+sma.toFixed(6)+"<br>"+
+ "Trend: "+(trendUp?"UP":trendDown?"DOWN":"NEUTRAL")+"<br>"+
+ "Support: "+(nearSupport?"Near support":"Not near support")+"<br>"+
+ "Resistance: "+(nearResistance?"Near resistance":"Not near resistance")+"<br>"+
+ "Candle: "+(bullishEngulf?"Bullish Engulfing":
+ bearishEngulf?"Bearish Engulfing":"No engulfing confirmation")+"<br>"+
+ "Confirmation: "+(signal==="WAIT"?"Not confirmed":"Strong setup detected");
+
+ if(signal!=="WAIT"){
+ const time=new Date().toLocaleTimeString();
+ const entry=document.createElement("div");
+ entry.textContent=time+" | "+market+" | "+asset+" | "+signal+" | 60s";
+ document.getElementById("history").prepend(entry);
+ }
+}
+</script>
+</body>
+</html>
