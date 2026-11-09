@@ -4,217 +4,349 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quotex Signal Dashboard</title>
+<title>Saiful Live Signal Dashboard</title>
 <style>
 *{box-sizing:border-box}
 body{
- margin:0;background:#10151f;color:white;
- font-family:Arial,sans-serif;padding:15px
+ margin:0;background:#111319;color:#fff;
+ font-family:Arial,sans-serif;padding:15px;
 }
-.container{max-width:650px;margin:auto}
-header{text-align:center;padding:15px}
-h1{color:#00d5ff;font-size:25px}
-.panel{
- background:#1b2432;padding:17px;
- border-radius:14px;margin:13px 0;
- border:1px solid #303d50
+.app{max-width:650px;margin:auto}
+.header{
+ text-align:center;padding:22px 10px;
+ background:#1c2029;border:1px solid #303744;
+ border-radius:18px;margin-bottom:15px;
 }
-label{display:block;margin:12px 0 6px;color:#b9c7d8}
-input,select{
- width:100%;padding:12px;border:1px solid #43516a;
- border-radius:8px;background:#101927;color:white;
- font-size:15px
+.header h1{margin:0;font-size:27px;letter-spacing:2px}
+.clock{font-size:30px;font-weight:bold;margin-top:12px}
+.small{color:#aab2c1;font-size:12px;margin-top:6px}
+.card{
+ background:#1c2029;border:1px solid #303744;
+ padding:17px;border-radius:16px;margin-bottom:14px;
 }
-button{
- width:100%;padding:14px;border:0;border-radius:9px;
- background:#00b9e8;color:#00131c;font-size:17px;
- font-weight:bold;margin-top:15px
+h3{margin:0 0 14px;font-size:16px}
+label{display:block;color:#aab2c1;font-size:13px;margin:10px 0 7px}
+select,button{
+ width:100%;padding:13px;border-radius:10px;
+ border:1px solid #394252;background:#252b37;
+ color:white;font-size:15px;
 }
-.signal{text-align:center;padding:25px}
-.signal h2{font-size:35px;margin:10px}
-.call{color:#00e69a}
-.put{color:#ff5369}
-.wait{color:#ffcc66}
-.small{color:#a8b6c8;font-size:13px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.status{font-size:14px;line-height:1.8}
-footer{text-align:center;color:#8996a8;font-size:12px;padding:20px}
+button{background:#2768d9;border:0;font-weight:bold;margin-top:12px}
+button:active{opacity:.8}
+.status{display:flex;justify-content:space-between;align-items:center}
+.dot{color:#42e58b;font-weight:bold}
+.signal{
+ text-align:center;padding:24px 10px;
+ background:#252b37;border-radius:14px;margin-top:12px;
+}
+.signal h2{font-size:38px;margin:8px 0}
+.call{color:#4bea9a}
+.put{color:#ff626e}
+.wait{color:#ffc75e}
+.info{color:#aab2c1;font-size:13px;line-height:1.8}
+.history-row{
+ display:flex;justify-content:space-between;
+ gap:10px;padding:12px 2px;
+ border-bottom:1px solid #343b48;font-size:13px;
+}
+.history-row:last-child{border:0}
+.footer{text-align:center;color:#788294;font-size:11px;padding:15px}
 </style>
 </head>
 <body>
-<div class="container">
+<div class="app">
 
-<header>
-<h1>⚡ QUOTEX SIGNAL</h1>
-<p>SMART SIGNAL DASHBOARD</p>
-<div class="small">SMA 13 + Support Resistance + Candle Confirmation</div>
-</header>
-
-<div class="panel">
-<h3>Market Settings</h3>
-<label>Market Type</label>
-<select id="market">
-<option>Regular</option>
-<option>OTC</option>
-</select>
-
-<label>Asset / Currency Pair</label>
-<input id="asset" value="EUR/USD" placeholder="EUR/USD">
-
-<label>Expiry Time</label>
-<select id="expiry">
-<option value="60">60 Seconds</option>
-</select>
+<div class="header">
+ <h1>SAIFUL KHAN</h1>
+ <div class="small">QUOTEX LIVE SIGNAL DASHBOARD</div>
+ <div class="clock" id="clock">--:--:--</div>
+ <div class="small">BAHRAIN LOCAL TIME</div>
 </div>
 
-<div class="panel">
-<h3>13 Candle Closing Prices</h3>
-<label>Enter 13 closing prices, separated by commas</label>
-<textarea id="closes" rows="3" style="width:100%;padding:12px;background:#101927;color:white;border:1px solid #43516a;border-radius:8px" placeholder="1.0850,1.0852,1.0851,..."></textarea>
-<p class="small">পুরোনো থেকে নতুন ক্রমানুসারে ১৩টি Close Price দাও।</p>
+<div class="card">
+ <div class="status">
+  <h3>MARKET CONNECTION</h3>
+  <span class="dot" id="connection">CONNECTING...</span>
+ </div>
+
+ <label>Market Type</label>
+ <select id="market">
+  <option value="regular">Regular Market</option>
+  <option value="otc" disabled>OTC (Data source required)</option>
+ </select>
+
+ <label>Currency Pair</label>
+ <select id="symbol">
+  <option>EUR/USD</option>
+  <option>GBP/USD</option>
+  <option>USD/JPY</option>
+  <option>USD/CHF</option>
+  <option>AUD/USD</option>
+  <option>USD/CAD</option>
+  <option>EUR/JPY</option>
+  <option>GBP/JPY</option>
+ </select>
+
+ <button id="refresh">CHECK LIVE SIGNAL</button>
+ <p class="info" id="lastUpdate">Waiting for market data...</p>
 </div>
 
-<div class="panel">
-<h3>Support & Resistance</h3>
-<div class="grid">
-<div>
-<label>Support</label>
-<input id="support" type="number" step="any" placeholder="Support price">
-</div>
-<div>
-<label>Resistance</label>
-<input id="resistance" type="number" step="any" placeholder="Resistance price">
-</div>
-</div>
-</div>
-
-<div class="panel">
-<h3>Previous Candle OHLC</h3>
-<div class="grid">
-<div><label>Open</label><input id="po" type="number" step="any"></div>
-<div><label>High</label><input id="ph" type="number" step="any"></div>
-<div><label>Low</label><input id="pl" type="number" step="any"></div>
-<div><label>Close</label><input id="pc" type="number" step="any"></div>
-</div>
+<div class="card">
+ <h3>LATEST SIGNAL</h3>
+ <div class="signal">
+  <div class="small" id="pairName">EUR/USD</div>
+  <h2 class="wait" id="signalText">WAIT</h2>
+  <div class="info" id="signalReason">Waiting for confirmation</div>
+  <div class="info" style="margin-top:12px">
+   Signal Time: <b id="signalTime">--:--:--</b><br>
+   Expiry: <b>60 Seconds</b><br>
+   Entry Price: <b id="entryPrice">--</b><br>
+   SMA 13: <b id="smaValue">--</b>
+  </div>
+ </div>
 </div>
 
-<div class="panel">
-<h3>Current Completed Candle OHLC</h3>
-<div class="grid">
-<div><label>Open</label><input id="co" type="number" step="any"></div>
-<div><label>High</label><input id="ch" type="number" step="any"></div>
-<div><label>Low</label><input id="cl" type="number" step="any"></div>
-<div><label>Close</label><input id="cc" type="number" step="any"></div>
-</div>
-<button onclick="generateSignal()">GENERATE SIGNAL</button>
-</div>
-
-<div class="panel signal">
-<div class="small">SIGNAL RESULT</div>
-<h2 id="result" class="wait">WAIT</h2>
-<div id="details">Enter candle data to analyze</div>
+<div class="card">
+ <h3>MARKET ANALYSIS</h3>
+ <div class="info" id="analysis">
+  Trend: Waiting<br>
+  Support: --<br>
+  Resistance: --<br>
+  Candle Confirmation: Waiting
+ </div>
 </div>
 
-<div class="panel">
-<h3>Analysis Details</h3>
-<div class="status" id="analysis">
-SMA 13: Waiting<br>
-Trend: Waiting<br>
-Support: Waiting<br>
-Candle: Waiting<br>
-Confirmation: Waiting
-</div>
-</div>
-
-<div class="panel">
-<h3>Signal History</h3>
-<div id="history" class="small">No signals yet</div>
+<div class="card">
+ <div class="status">
+  <h3>SIGNAL HISTORY</h3>
+  <span class="small">Latest 30</span>
+ </div>
+ <div id="history">
+  <div class="info">No signals yet</div>
+ </div>
 </div>
 
-<footer>
-Signal analysis tool • Educational use only<br>
-No guaranteed profit or accuracy
-</footer>
+<div class="footer">
+ Saiful Live Signal System | Signal Only<br>
+ Signals are analytical estimates, not guaranteed results.
+</div>
 </div>
 
 <script>
-function num(id){
- return Number(document.getElementById(id).value);
+const API_BASE = "https://saiful-live-signal.onrender.com";
+const $ = id => document.getElementById(id);
+
+let lastCandle = {};
+let history = [];
+let busy = false;
+
+function bahrainTime(date = new Date()){
+ return new Intl.DateTimeFormat("en-GB",{
+  timeZone:"Asia/Bahrain",
+  hour:"2-digit",minute:"2-digit",second:"2-digit",
+  hour12:false
+ }).format(date);
 }
-function generateSignal(){
- const result=document.getElementById("result");
- const details=document.getElementById("details");
- const analysis=document.getElementById("analysis");
 
- const closes=document.getElementById("closes").value
- .split(",").map(x=>Number(x.trim()));
+function updateClock(){
+ $("clock").textContent=bahrainTime();
+}
+setInterval(updateClock,1000);
+updateClock();
 
- if(closes.length!==13 || closes.some(x=>!Number.isFinite(x)||x<=0)){
- alert("Enter exactly 13 valid closing prices.");
- return;
+function showSignal(type,reason,time,price,sma){
+ const el=$("signalText");
+ el.textContent=type;
+ el.className=type==="CALL"?"call":type==="PUT"?"put":"wait";
+ $("signalReason").textContent=reason;
+ $("signalTime").textContent=time;
+ $("entryPrice").textContent=price;
+ $("smaValue").textContent=sma;
+}
+
+function saveHistory(item){
+ history.unshift(item);
+ history=history.slice(0,30);
+ try{localStorage.setItem("saiful_signal_history",JSON.stringify(history));}
+ catch(e){}
+ renderHistory();
+}
+
+function renderHistory(){
+ $("history").innerHTML="";
+ if(!history.length){
+  $("history").textContent="No confirmed signals yet";
+  return;
+ }
+ history.forEach(item=>{
+  const row=document.createElement("div");
+  row.className="history-row";
+  const left=document.createElement("span");
+  left.textContent=item.type+" — "+item.symbol;
+  left.style.color=item.type==="CALL"?"#4bea9a":"#ff626e";
+  const right=document.createElement("span");
+  right.textContent=item.time;
+  row.append(left,right);
+  $("history").appendChild(row);
+ });
+}
+
+try{
+ const saved=JSON.parse(localStorage.getItem("saiful_signal_history")||"[]");
+ if(Array.isArray(saved))history=saved.slice(0,30);
+}catch(e){}
+renderHistory();
+
+function analyze(candles){
+ // API returns newest first.
+ // Exclude newest candle because it may still be forming.
+ const data=candles.slice(1).map(c=>({
+  time:c.datetime,
+  open:Number(c.open),
+  high:Number(c.high),
+  low:Number(c.low),
+  close:Number(c.close)
+ })).filter(c=>
+  Number.isFinite(c.open)&&Number.isFinite(c.high)&&
+  Number.isFinite(c.low)&&Number.isFinite(c.close)
+ );
+
+ if(data.length<25)throw Error("Not enough candle data");
+
+ const current=data[0];
+ const previous=data.slice(1,21);
+ const recent13=data.slice(0,13);
+ const old13=data.slice(3,16);
+
+ const sma=arr=>arr.reduce((s,c)=>s+c.close,0)/arr.length;
+ const smaNow=sma(recent13);
+ const smaOld=sma(old13);
+
+ const support=Math.min(...previous.map(c=>c.low));
+ const resistance=Math.max(...previous.map(c=>c.high));
+ const range=resistance-support;
+
+ const candleRange=current.high-current.low;
+ const body=Math.abs(current.close-current.open);
+ const bodyRatio=candleRange>0?body/candleRange:0;
+
+ const bullish=current.close>current.open &&
+  bodyRatio>=0.35 &&
+  current.close>=current.low+candleRange*0.70;
+
+ const bearish=current.close<current.open &&
+  bodyRatio>=0.35 &&
+  current.close<=current.low+candleRange*0.30;
+
+ const trendUp=current.close>smaNow && smaNow>smaOld;
+ const trendDown=current.close<smaNow && smaNow<smaOld;
+
+ const nearSupport=range>0 &&
+  current.close<=support+range*0.18;
+
+ const nearResistance=range>0 &&
+  current.close>=resistance-range*0.18;
+
+ const breakoutUp=current.close>resistance;
+ const breakoutDown=current.close<support;
+
+ let type="WAIT";
+ let reason="Strong confirmation not found";
+
+ if(trendUp && bullish && (nearSupport||breakoutUp)){
+  type="CALL";
+  reason=breakoutUp?"Uptrend + bullish breakout + candle confirmation":
+   "Uptrend + support reaction + bullish candle";
+ }
+ else if(trendDown && bearish && (nearResistance||breakoutDown)){
+  type="PUT";
+  reason=breakoutDown?"Downtrend + bearish breakdown + candle confirmation":
+   "Downtrend + resistance rejection + bearish candle";
  }
 
- const s=num("support"),r=num("resistance");
- const po=num("po"),ph=num("ph"),pl=num("pl"),pc=num("pc");
- const co=num("co"),ch=num("ch"),cl=num("cl"),cc=num("cc");
+ return {
+  type,reason,current,smaNow,support,resistance,
+  trend:trendUp?"UPTREND":trendDown?"DOWNTREND":"SIDEWAYS",
+  candle:bullish?"BULLISH":bearish?"BEARISH":"NO CONFIRMATION"
+ };
+}
 
- const vals=[s,r,po,ph,pl,pc,co,ch,cl,cc];
- if(vals.some(x=>!Number.isFinite(x)||x<=0) ||
- s>=r || ph<Math.max(po,pc) || pl>Math.min(po,pc) ||
- ch<Math.max(co,cc) || cl>Math.min(co,cc) ||
- ph<pl || ch<cl){
- alert("Check all OHLC, Support and Resistance values.");
- return;
+async function checkSignal(){
+ if(busy)return;
+ if($("market").value==="otc"){
+  alert("OTC data source is not connected.");
+  return;
  }
 
- const sma=closes.reduce((a,b)=>a+b,0)/13;
- const trendUp=cc>sma;
- const trendDown=cc<sma;
+ busy=true;
+ $("refresh").disabled=true;
+ $("connection").textContent="CHECKING...";
 
- const nearSupport=Math.abs(cc-s)/cc<=0.0015;
- const nearResistance=Math.abs(cc-r)/cc<=0.0015;
+ const symbol=$("symbol").value;
+ $("pairName").textContent=symbol;
 
- const bullishEngulf=pc<po && cc>co &&
- co<=pc && cc>=po;
- const bearishEngulf=pc>po && cc<co &&
- co>=pc && cc<=po;
+ try{
+  const url=API_BASE+"/api/market?symbol="+encodeURIComponent(symbol);
+  const response=await fetch(url);
+  const data=await response.json();
 
- let signal="WAIT",reason="Conditions not confirmed.";
+  if(!response.ok||!data.candles)
+   throw Error(data.error||"Market data unavailable");
 
- if(trendUp && nearSupport && bullishEngulf){
- signal="CALL";
- reason="Uptrend + Support + Bullish Engulfing";
- }
- else if(trendDown && nearResistance && bearishEngulf){
- signal="PUT";
- reason="Downtrend + Resistance + Bearish Engulfing";
- }
+  $("connection").textContent="● ONLINE";
+  $("connection").style.color="#42e58b";
 
- result.textContent=signal;
- result.className=signal==="CALL"?"call":
- signal==="PUT"?"put":"wait";
+  const result=analyze(data.candles);
+  const now=bahrainTime();
+  const candleID=symbol+"_"+result.current.time;
 
- const market=document.getElementById("market").value;
- const asset=document.getElementById("asset").value;
- details.innerHTML=
- market+" | "+asset+" | 60 Seconds<br>"+reason;
+  $("lastUpdate").textContent=
+   "Last checked: "+now+" | Candle: "+result.current.time;
 
- analysis.innerHTML=
- "SMA 13: "+sma.toFixed(6)+"<br>"+
- "Trend: "+(trendUp?"UP":trendDown?"DOWN":"NEUTRAL")+"<br>"+
- "Support: "+(nearSupport?"Near support":"Not near support")+"<br>"+
- "Resistance: "+(nearResistance?"Near resistance":"Not near resistance")+"<br>"+
- "Candle: "+(bullishEngulf?"Bullish Engulfing":
- bearishEngulf?"Bearish Engulfing":"No engulfing confirmation")+"<br>"+
- "Confirmation: "+(signal==="WAIT"?"Not confirmed":"Strong setup detected");
+  $("analysis").innerHTML=
+   "Trend: "+result.trend+
+   "<br>Support: "+result.support.toFixed(5)+
+   "<br>Resistance: "+result.resistance.toFixed(5)+
+   "<br>Candle Confirmation: "+result.candle;
 
- if(signal!=="WAIT"){
- const time=new Date().toLocaleTimeString();
- const entry=document.createElement("div");
- entry.textContent=time+" | "+market+" | "+asset+" | "+signal+" | 60s";
- document.getElementById("history").prepend(entry);
+  if(lastCandle[symbol]!==candleID){
+   lastCandle[symbol]=candleID;
+
+   showSignal(
+    result.type,result.reason,now,
+    result.current.close.toFixed(5),
+    result.smaNow.toFixed(5)
+   );
+
+   if(result.type==="CALL"||result.type==="PUT"){
+    saveHistory({
+     type:result.type,
+     symbol,
+     time:now,
+     price:result.current.close.toFixed(5)
+    });
+   }
+  }
+
+ }catch(error){
+  $("connection").textContent="● ERROR";
+  $("connection").style.color="#ff626e";
+  $("lastUpdate").textContent=error.message;
+ }finally{
+  busy=false;
+  $("refresh").disabled=false;
  }
 }
+
+$("refresh").addEventListener("click",checkSignal);
+$("symbol").addEventListener("change",()=>{
+ showSignal("WAIT","Checking selected pair","--:--:--","--","--");
+ checkSignal();
+});
+
+// First check, then every 60 seconds.
+checkSignal();
+setInterval(checkSignal,60000);
 </script>
 </body>
 </html>
